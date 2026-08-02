@@ -1,0 +1,22 @@
+# Upgrade Guide
+
+## Safe update process
+
+1. Open the current ReminDUE app.
+2. Go to **More**.
+3. Select **Export backup**.
+4. Save the JSON file safely.
+5. Replace the application files in the same GitHub repository.
+6. Keep the repository name and GitHub Pages URL unchanged.
+7. Open the app and verify that existing items are present.
+8. If needed, use **Import backup**.
+
+## Versioning rule
+
+Application code and user data are deliberately separated.
+
+- Application code: GitHub repository files
+- User data: browser storage
+- Backup: downloadable JSON file
+
+Future database changes should use migration scripts rather than changing or deleting the current storage key.
