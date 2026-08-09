@@ -4,196 +4,213 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#14606e">
-  <meta name="description" content="ReminDUE — before it is due, we remind you.">
+  <meta name="description" content="ReminDUE — Before it’s due, we remind you.">
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="icon" href="./assets/icons/icon-192.png">
-  <link rel="apple-touch-icon" href="./assets/icons/icon-192.png">
   <link rel="stylesheet" href="./src/css/styles.css">
   <title>ReminDUE</title>
 </head>
 <body>
-  <div id="app">
-    <header class="app-header">
-      <div>
-        <div class="brand">Remin<span>DUE</span></div>
-        <p class="tagline">Before it’s due, we remind you.</p>
+<div id="app">
+  <header class="app-header">
+    <div>
+      <div class="brand">Remin<span>DUE</span></div>
+      <p class="tagline">Before it’s due, we remind you.</p>
+    </div>
+    <button id="notificationBtn" class="icon-btn" type="button" title="Enable notifications">🔔</button>
+  </header>
+
+  <main>
+    <section id="homeView" class="view active">
+      <div class="summary-grid">
+        <article class="summary-card"><span>Due soon</span><strong id="dueSoonCount">0</strong></article>
+        <article class="summary-card danger"><span>Overdue</span><strong id="overdueCount">0</strong></article>
+        <article class="summary-card"><span>This month</span><strong id="monthCount">0</strong></article>
       </div>
-      <button id="notificationBtn" class="icon-btn" aria-label="Enable notifications" title="Enable notifications">🔔</button>
-    </header>
+      <div class="section-head">
+        <div><h1>What’s next</h1><p id="todayLabel"></p></div>
+        <button class="primary" type="button" data-action="open-add">+ Add</button>
+      </div>
+      <div id="timeline"></div>
+    </section>
 
-    <main>
-      <section id="homeView" class="view active">
-        <section class="summary-grid">
-          <article class="summary-card">
-            <span>Due soon</span>
-            <strong id="dueSoonCount">0</strong>
-          </article>
-          <article class="summary-card danger">
-            <span>Overdue</span>
-            <strong id="overdueCount">0</strong>
-          </article>
-          <article class="summary-card">
-            <span>This month</span>
-            <strong id="monthCount">0</strong>
-          </article>
-        </section>
+    <section id="calendarView" class="view">
+      <div class="section-head">
+        <div><h1>Calendar</h1><p>Tap a date to see its activities</p></div>
+      </div>
+      <div class="calendar-toolbar">
+        <button id="prevMonth" class="secondary" type="button">‹</button>
+        <strong id="calendarTitle"></strong>
+        <button id="nextMonth" class="secondary" type="button">›</button>
+      </div>
+      <div id="calendarGrid" class="calendar-grid"></div>
+      <div id="calendarAgenda" class="agenda"></div>
+    </section>
 
-        <section class="section-head">
-          <div>
-            <h1>What’s next</h1>
-            <p id="todayLabel"></p>
-          </div>
-          <button class="primary" data-action="open-add">+ Add</button>
-        </section>
+    <section id="insightsView" class="view">
+      <div class="section-head">
+        <div><h1>Insights</h1><p>Understand your commitments at a glance</p></div>
+      </div>
+      <div class="insight-filters">
+        <select id="insightDimension" aria-label="Insight grouping">
+          <option value="type">By type</option>
+          <option value="category">By category</option>
+          <option value="date">By date</option>
+          <option value="status">Upcoming vs completed</option>
+        </select>
+        <select id="insightPeriod" aria-label="Insight period">
+          <option value="all">All time</option>
+          <option value="30">Next / last 30 days</option>
+          <option value="90">Next / last 90 days</option>
+          <option value="365">Next / last 12 months</option>
+        </select>
+      </div>
+      <div id="insightSummary" class="insight-summary"></div>
+      <div id="insightReport" class="insight-report"></div>
+    </section>
 
-        <div id="timeline"></div>
-      </section>
-
-      <section id="calendarView" class="view">
-        <section class="section-head">
-          <div>
-            <h1>Calendar</h1>
-            <p>All upcoming commitments</p>
-          </div>
-        </section>
-        <div class="calendar-toolbar">
-          <button id="prevMonth" class="secondary">‹</button>
-          <strong id="calendarTitle"></strong>
-          <button id="nextMonth" class="secondary">›</button>
-        </div>
-        <div id="calendarGrid" class="calendar-grid"></div>
-        <div id="calendarAgenda" class="agenda"></div>
-      </section>
-
-      <section id="insightsView" class="view">
-        <section class="section-head"><div><h1>Insights</h1><p>Useful reports across your commitments</p></div></section>
-        <div class="insight-filters"><select id="insightDimension"><option value="type">By type</option><option value="category">By category</option><option value="date">By date</option><option value="status">Upcoming vs completed</option></select><select id="insightPeriod"><option value="all">All time</option><option value="30">Next / last 30 days</option><option value="90">Next / last 90 days</option><option value="365">Next / last 12 months</option></select></div>
-        <div id="insightSummary" class="insight-summary"></div><div id="insightReport" class="insight-report"></div>
-      </section>
-
-      <section id="moreView" class="view">
-        <section class="section-head">
-          <div>
-            <h1>More</h1>
-            <p>Backup, restore and app settings</p>
-          </div>
-        </section>
-
-        <div class="settings-card">
-          <h2>Data safety</h2>
-          <p>Your data is stored on this device and remains separate from future app updates.</p>
-          <div class="stack">
-            <button id="exportBtn" class="primary">Export backup</button>
-            <label class="secondary file-label">
-              Import backup
-              <input id="importInput" type="file" accept="application/json">
-            </label>
-            <button id="exportCsvBtn" class="secondary">Export CSV</button>
-          </div>
-        </div>
-
-        <div class="settings-card">
-          <h2>Notifications</h2>
-          <p>Enable browser notifications. ReminDUE checks upcoming and overdue items whenever the app is opened.</p>
-          <button id="notificationSettingsBtn" class="secondary">Enable notifications</button>
-        </div>
-
-        <div class="settings-card"><h2>Enhancements & feedback</h2><p>Suggest improvements or record feedback. Editing is disabled by default.</p><div class="feedback-controls"><button id="editFeedbackBtn" class="secondary">Edit feedback</button><button id="saveFeedbackBtn" class="primary hidden">Save feedback</button></div><textarea id="feedbackText" rows="6" maxlength="2000" disabled placeholder="Type your enhancement ideas or feedback here..."></textarea></div>
-
-        <div class="settings-card">
-          <h2>About</h2>
-          <p><strong>ReminDUE</strong><br>Version 1.2.0</p>
-        </div>
-      </section>
-    </main>
-
-    <nav class="bottom-nav" aria-label="Primary">
-      <button data-view="homeView" class="active"><span>⌂</span>Home</button>
-      <button data-view="calendarView"><span>▦</span>Calendar</button>
-      <button data-view="insightsView"><span>◔</span>Insights</button>
-      <button data-view="moreView"><span>•••</span>More</button>
-    </nav>
-  </div>
-
-  <dialog id="completionDialog"><form id="completionForm" method="dialog"><div class="dialog-head"><h2 id="completionTitle">Complete item</h2><button type="button" id="closeCompletion" class="icon-btn">✕</button></div><input type="hidden" id="completionItemId"><label>Completed / Paid on<input id="completedDate" type="date" required></label><label>Completion notes <span class="required">*</span><textarea id="completionNotes" rows="4" required maxlength="500" placeholder="Record what was paid, completed, renewed or attended..."></textarea></label><div class="dialog-actions"><span></span><button type="button" id="cancelCompletion" class="secondary">Cancel</button><button type="submit" class="primary">Confirm completion</button></div></form></dialog>
-
-  <dialog id="itemDialog">
-    <form id="itemForm" method="dialog">
-      <div class="dialog-head">
-        <h2 id="dialogTitle">Add item</h2>
-        <button type="button" id="closeDialog" class="icon-btn">✕</button>
+    <section id="moreView" class="view">
+      <div class="section-head">
+        <div><h1>More</h1><p>Backup, restore and settings</p></div>
       </div>
 
-      <input type="hidden" id="itemId">
+      <div class="settings-card">
+        <h2>Data safety</h2>
+        <p>Your personal data stays in this browser/device. Export a backup before major updates.</p>
+        <div class="stack">
+          <button id="exportBtn" class="primary" type="button">Export backup</button>
+          <label class="secondary file-label">Import backup
+            <input id="importInput" type="file" accept="application/json">
+          </label>
+          <button id="exportCsvBtn" class="secondary" type="button">Export CSV</button>
+        </div>
+      </div>
 
-      <label>Title
-        <input id="title" required maxlength="80" placeholder="e.g. Electricity bill">
+      <div class="settings-card">
+        <h2>Enhancements & feedback</h2>
+        <p>Disabled by default. Select Edit feedback when you want to record ideas or improvements.</p>
+        <div class="feedback-controls">
+          <button id="editFeedbackBtn" class="secondary" type="button">Edit feedback</button>
+          <button id="saveFeedbackBtn" class="primary hidden" type="button">Save feedback</button>
+        </div>
+        <textarea id="feedbackText" rows="6" maxlength="2000" disabled placeholder="Type your enhancement ideas or feedback here..."></textarea>
+      </div>
+
+      <div class="settings-card">
+        <h2>Notifications</h2>
+        <p>Enable browser notifications. The app checks due items whenever it is opened.</p>
+        <button id="notificationSettingsBtn" class="secondary" type="button">Enable notifications</button>
+      </div>
+
+      <div class="settings-card">
+        <h2>About</h2>
+        <p><strong>ReminDUE</strong><br>Version 1.2.1</p>
+      </div>
+    </section>
+  </main>
+
+  <nav class="bottom-nav" aria-label="Primary navigation">
+    <button type="button" data-view="homeView" class="active"><span>⌂</span>Home</button>
+    <button type="button" data-view="calendarView"><span>▦</span>Calendar</button>
+    <button type="button" data-view="insightsView"><span>◔</span>Insights</button>
+    <button type="button" data-view="moreView"><span>•••</span>More</button>
+  </nav>
+</div>
+
+<dialog id="itemDialog">
+  <form id="itemForm" novalidate>
+    <div class="dialog-head">
+      <h2 id="dialogTitle">Add item</h2>
+      <button type="button" id="closeDialog" class="icon-btn">✕</button>
+    </div>
+    <input type="hidden" id="itemId">
+
+    <label>Title
+      <input id="title" required maxlength="80" placeholder="e.g. Electricity bill">
+    </label>
+
+    <div class="form-grid">
+      <label>Type
+        <select id="type" required>
+          <option value="payment">Payment</option>
+          <option value="renewal">Renewal</option>
+          <option value="appointment">Appointment</option>
+          <option value="maintenance">Maintenance</option>
+          <option value="reminder">Reminder</option>
+        </select>
       </label>
-
-      <div class="form-grid">
-        <label>Type
-          <select id="type" required>
-            <option value="payment">Payment</option>
-            <option value="renewal">Renewal</option>
-            <option value="appointment">Appointment</option>
-            <option value="maintenance">Maintenance</option>
-            <option value="reminder">Reminder</option>
-          </select>
-        </label>
-
-        <label>Category
-          <input id="category" maxlength="40" placeholder="e.g. Utility">
-        </label>
-      </div>
-
-      <div class="form-grid">
-        <label>Due date
-          <input id="dueDate" type="date" required>
-        </label>
-
-        <label>Amount (optional)
-          <input id="amount" type="number" min="0" step="0.01" placeholder="0">
-        </label>
-      </div>
-
-      <div class="form-grid">
-        <label>Repeat
-          <select id="repeat">
-            <option value="none">Does not repeat</option>
-            <option value="weekly">Weekly</option>
-            <option value="monthly">Monthly</option>
-            <option value="quarterly">Quarterly</option>
-            <option value="halfyearly">Half-yearly</option>
-            <option value="yearly">Yearly</option>
-          </select>
-        </label>
-
-        <label>Remind before
-          <select id="reminderDays">
-            <option value="0">On due date</option>
-            <option value="1">1 day before</option>
-            <option value="3">3 days before</option>
-            <option value="7" selected>7 days before</option>
-            <option value="14">14 days before</option>
-            <option value="30">30 days before</option>
-            <option value="90">90 days before</option>
-          </select>
-        </label>
-      </div>
-
-      <label>Notes
-        <textarea id="notes" rows="3" maxlength="500" placeholder="Optional notes"></textarea>
+      <label>Category
+        <input id="category" maxlength="40" placeholder="e.g. Utility">
       </label>
+    </div>
 
-      <div class="dialog-actions">
-        <button type="button" id="deleteBtn" class="danger-btn hidden">Delete</button>
-        <span></span>
-        <button type="button" id="cancelBtn" class="secondary">Cancel</button>
-        <button type="submit" class="primary">Save</button>
-      </div>
-    </form>
-  </dialog>
+    <div class="form-grid">
+      <label>Due date
+        <input id="dueDate" type="date" required>
+      </label>
+      <label>Amount (optional)
+        <input id="amount" type="number" min="0" step="0.01" placeholder="0">
+      </label>
+    </div>
 
-  <script type="module" src="./src/js/app.js"></script>
+    <div class="form-grid">
+      <label>Repeat
+        <select id="repeat">
+          <option value="none">Does not repeat</option>
+          <option value="weekly">Weekly</option>
+          <option value="monthly">Monthly</option>
+          <option value="quarterly">Quarterly</option>
+          <option value="halfyearly">Half-yearly</option>
+          <option value="yearly">Yearly</option>
+        </select>
+      </label>
+      <label>Remind before
+        <select id="reminderDays">
+          <option value="0">On due date</option>
+          <option value="1">1 day before</option>
+          <option value="3">3 days before</option>
+          <option value="7" selected>7 days before</option>
+          <option value="14">14 days before</option>
+          <option value="30">30 days before</option>
+          <option value="90">90 days before</option>
+        </select>
+      </label>
+    </div>
+
+    <label>Notes
+      <textarea id="notes" rows="3" maxlength="500" placeholder="Optional notes"></textarea>
+    </label>
+
+    <div class="dialog-actions">
+      <button type="button" id="deleteBtn" class="danger-btn hidden">Delete</button>
+      <span></span>
+      <button type="button" id="cancelBtn" class="secondary">Cancel</button>
+      <button type="submit" class="primary">Save</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="completionDialog">
+  <form id="completionForm" novalidate>
+    <div class="dialog-head">
+      <h2 id="completionTitle">Mark as completed</h2>
+      <button type="button" id="closeCompletion" class="icon-btn">✕</button>
+    </div>
+    <input type="hidden" id="completionItemId">
+    <label>Completed / Paid on
+      <input id="completedDate" type="date" required>
+    </label>
+    <label>Completion notes <span class="required">*</span>
+      <textarea id="completionNotes" rows="4" required maxlength="500" placeholder="What was paid, completed, renewed or attended?"></textarea>
+    </label>
+    <div class="dialog-actions">
+      <span></span>
+      <button type="button" id="cancelCompletion" class="secondary">Cancel</button>
+      <button type="submit" class="primary">Confirm</button>
+    </div>
+  </form>
+</dialog>
+
+<script type="module" src="./src/js/app.js"></script>
 </body>
 </html>
