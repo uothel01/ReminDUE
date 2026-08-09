@@ -1,4 +1,4 @@
-# ReminDUE v1.2.1
+# ReminDUE v1.2.2
 
 Before it’s due, we remind you.
 

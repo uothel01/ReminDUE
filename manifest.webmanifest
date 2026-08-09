@@ -1,7 +1,7 @@
 {
   "name": "ReminDUE",
   "short_name": "ReminDUE",
-  "description": "Track bills, renewals, appointments, maintenance and reminders.",
+  "description": "Track bills, renewals, appointments, maintenance and reminders. Version 1.2.2.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
