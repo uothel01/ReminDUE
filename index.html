@@ -65,27 +65,10 @@
         <div id="calendarAgenda" class="agenda"></div>
       </section>
 
-      <section id="itemsView" class="view">
-        <section class="section-head">
-          <div>
-            <h1>All items</h1>
-            <p>Payments, renewals, appointments and reminders</p>
-          </div>
-          <button class="primary" data-action="open-add">+ Add</button>
-        </section>
-
-        <div class="filters">
-          <input id="searchInput" type="search" placeholder="Search items">
-          <select id="typeFilter">
-            <option value="all">All types</option>
-            <option value="payment">Payments</option>
-            <option value="renewal">Renewals</option>
-            <option value="appointment">Appointments</option>
-            <option value="reminder">Reminders</option>
-          </select>
-        </div>
-
-        <div id="allItems"></div>
+      <section id="insightsView" class="view">
+        <section class="section-head"><div><h1>Insights</h1><p>Useful reports across your commitments</p></div></section>
+        <div class="insight-filters"><select id="insightDimension"><option value="type">By type</option><option value="category">By category</option><option value="date">By date</option><option value="status">Upcoming vs completed</option></select><select id="insightPeriod"><option value="all">All time</option><option value="30">Next / last 30 days</option><option value="90">Next / last 90 days</option><option value="365">Next / last 12 months</option></select></div>
+        <div id="insightSummary" class="insight-summary"></div><div id="insightReport" class="insight-report"></div>
       </section>
 
       <section id="moreView" class="view">
@@ -115,6 +98,8 @@
           <button id="notificationSettingsBtn" class="secondary">Enable notifications</button>
         </div>
 
+        <div class="settings-card"><h2>Enhancements & feedback</h2><p>Suggest improvements or record feedback. Editing is disabled by default.</p><div class="feedback-controls"><button id="editFeedbackBtn" class="secondary">Edit feedback</button><button id="saveFeedbackBtn" class="primary hidden">Save feedback</button></div><textarea id="feedbackText" rows="6" maxlength="2000" disabled placeholder="Type your enhancement ideas or feedback here..."></textarea></div>
+
         <div class="settings-card">
           <h2>About</h2>
           <p><strong>ReminDUE</strong><br>Version 1.0.0</p>
@@ -125,10 +110,12 @@
     <nav class="bottom-nav" aria-label="Primary">
       <button data-view="homeView" class="active"><span>⌂</span>Home</button>
       <button data-view="calendarView"><span>▦</span>Calendar</button>
-      <button data-view="itemsView"><span>☷</span>All Items</button>
+      <button data-view="insightsView"><span>◔</span>Insights</button>
       <button data-view="moreView"><span>•••</span>More</button>
     </nav>
   </div>
+
+  <dialog id="completionDialog"><form id="completionForm" method="dialog"><div class="dialog-head"><h2 id="completionTitle">Complete item</h2><button type="button" id="closeCompletion" class="icon-btn">✕</button></div><input type="hidden" id="completionItemId"><label>Completed / Paid on<input id="completedDate" type="date" required></label><label>Completion notes <span class="required">*</span><textarea id="completionNotes" rows="4" required maxlength="500" placeholder="Record what was paid, completed, renewed or attended..."></textarea></label><div class="dialog-actions"><span></span><button type="button" id="cancelCompletion" class="secondary">Cancel</button><button type="submit" class="primary">Confirm completion</button></div></form></dialog>
 
   <dialog id="itemDialog">
     <form id="itemForm" method="dialog">

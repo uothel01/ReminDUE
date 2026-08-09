@@ -20,3 +20,6 @@ Application code and user data are deliberately separated.
 - Backup: downloadable JSON file
 
 Future database changes should use migration scripts rather than changing or deleting the current storage key.
+
+## v1.1
+The same `remindue.items.v1` storage key is retained. Existing records remain available. New completion date/notes fields are optional for legacy completed records and are populated for new completions. Export a backup before upgrading.
