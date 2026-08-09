@@ -55,7 +55,20 @@ function seedIfEmpty() {
       notes: "",
       status: "upcoming",
       createdAt: new Date().toISOString()
-    }
+    },
+    {
+      id: crypto.randomUUID(),
+      title: "Car service",
+      type: "maintenance",
+      category: "Vehicle",
+      dueDate: plus(15),
+      amount: "",
+      repeat: "halfyearly",
+      reminderDays: "7",
+      notes: "",
+      status: "upcoming",
+      createdAt: new Date().toISOString()
+
   ];
   saveItems(items);
 }
@@ -103,19 +116,6 @@ function renderHome() {
   ).join("") || `<div class="empty">No active items. Add your first reminder.</div>`;
 }
 
-function renderItems() {
-  const q = $("searchInput").value.trim().toLowerCase();
-  const filter = $("typeFilter").value;
-  const filtered = [...items]
-    .filter(i => filter === "all" || i.type === filter)
-    .filter(i => `${i.title} ${i.category} ${i.notes}`.toLowerCase().includes(q))
-    .sort((a,b) => a.dueDate.localeCompare(b.dueDate));
-
-  $("allItems").innerHTML = filtered.length
-    ? filtered.map(itemCard).join("")
-    : `<div class="empty">No matching items.</div>`;
-}
-
 function renderCalendar() {
   const year = calendarCursor.getFullYear();
   const month = calendarCursor.getMonth();
@@ -153,8 +153,8 @@ function renderCalendar() {
 
 function renderAll() {
   renderHome();
-  renderItems();
   renderCalendar();
+  if ($("insightsView").classList.contains("active")) renderInsights();
 }
 
 function renderCalendarAgenda(dateKey) { const agenda=items.filter(i=>i.dueDate===dateKey).sort((a,b)=>(a.status==="completed")-(b.status==="completed")); const title=`Items on ${formatDate(dateKey,{weekday:"long",day:"numeric",month:"long",year:"numeric"})}`; $("calendarAgenda").innerHTML=agenda.length?`<h3 class="group-title">${title}</h3>${agenda.map(itemCard).join("")}`:`<div class="empty">${title}: no items.</div>`; }
@@ -260,7 +260,12 @@ document.addEventListener("click", e => {
   const complete = e.target.closest("[data-complete]");
   if (complete) openCompletion(complete.dataset.complete);
   const cd = e.target.closest("[data-calendar-date]");
-  if (cd) { document.querySelectorAll(".calendar-day.selected").forEach(x=>x.classList.remove("selected")); cd.classList.add("selected"); renderCalendarAgenda(cd.dataset.calendarDate); }
+  if (cd) {
+    document.querySelectorAll(".calendar-day.selected").forEach(x => x.classList.remove("selected"));
+    cd.classList.add("selected");
+    renderCalendarAgenda(cd.dataset.calendarDate);
+    return;
+  }
 
   const nav = e.target.closest("[data-view]");
   if (nav) {
@@ -269,6 +274,7 @@ document.addEventListener("click", e => {
     $(nav.dataset.view).classList.add("active");
     nav.classList.add("active");
     if (nav.dataset.view === "insightsView") renderInsights();
+    if (nav.dataset.view === "calendarView") renderCalendar();
   }
 });
 
@@ -284,8 +290,6 @@ $("deleteBtn").onclick = () => {
   }
 };
 
-$("searchInput").addEventListener("input", renderItems);
-$("typeFilter").addEventListener("change", renderItems);
 $("prevMonth").onclick = () => { calendarCursor.setMonth(calendarCursor.getMonth()-1); renderCalendar(); };
 $("nextMonth").onclick = () => { calendarCursor.setMonth(calendarCursor.getMonth()+1); renderCalendar(); };
 

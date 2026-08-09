@@ -23,3 +23,10 @@ Future database changes should use migration scripts rather than changing or del
 
 ## v1.1
 The same `remindue.items.v1` storage key is retained. Existing records remain available. New completion date/notes fields are optional for legacy completed records and are populated for new completions. Export a backup before upgrading.
+
+
+## v1.2 fixes
+- Fixed the Insights/legacy All Items rendering reference that prevented the Calendar screen from initializing.
+- Added Maintenance explicitly to the Add Item type selector.
+- Calendar date selection now renders the selected date agenda and re-renders when entering Calendar.
+- Service-worker cache version bumped to v1.2.
