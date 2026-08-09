@@ -9,14 +9,17 @@ calendarCursor.setDate(1);
 
 const $ = id => document.getElementById(id);
 const dialog = $("itemDialog");
+const completionDialog = $("completionDialog");
 const form = $("itemForm");
 
 const iconMap = {
   payment: "₹",
   renewal: "↻",
   appointment: "🩺",
+  maintenance: "🔧",
   reminder: "🔔"
 };
+const typeLabels = {payment:"Payment", renewal:"Renewal", appointment:"Appointment", maintenance:"Maintenance", reminder:"Reminder"};
 
 function seedIfEmpty() {
   if (items.length) return;
@@ -71,22 +74,9 @@ function amountText(item) {
 }
 
 function itemCard(item) {
-  const status = statusFor(item);
-  const meta = [amountText(item), formatDate(item.dueDate), dueText(item.dueDate)]
-    .filter(Boolean).join(" · ");
-  return `
-    <article class="item-card ${status}">
-      <div class="item-icon">${iconMap[item.type] || "•"}</div>
-      <div>
-        <div class="item-title">${escapeHtml(item.title)}</div>
-        <div class="item-meta">${escapeHtml(meta)}${item.category ? `<br>${escapeHtml(item.category)}` : ""}</div>
-      </div>
-      <div class="item-actions">
-        ${item.status !== "completed" ? `<button class="mini done" data-complete="${item.id}">${item.type === "payment" ? "Mark paid" : "Complete"}</button>` : ""}
-        <button class="mini" data-edit="${item.id}">Edit</button>
-      </div>
-    </article>
-  `;
+  const status = statusFor(item); const meta=[amountText(item),formatDate(item.dueDate),dueText(item.dueDate)].filter(Boolean).join(" · ");
+  const completedMeta=item.status==="completed"&&item.completedDate?`<br>Completed: ${formatDate(item.completedDate)}${item.completionNotes?" · "+escapeHtml(item.completionNotes):""}`:"";
+  return `<article class="item-card ${status}"><div class="item-icon">${iconMap[item.type]||"•"}</div><div><div class="item-title">${escapeHtml(item.title)}</div><div class="item-meta">${escapeHtml(meta)}${item.category?`<br>${escapeHtml(item.category)}`:""}${completedMeta}</div></div><div class="item-actions">${item.status!=="completed"?`<button class="mini done" data-complete="${item.id}">${item.type==="payment"?"Mark paid":"Complete"}</button>`:""}<button class="mini" data-edit="${item.id}">Edit</button></div></article>`;
 }
 
 function renderHome() {
@@ -144,7 +134,7 @@ function renderCalendar() {
     const dayItems = items.filter(x => x.dueDate === key && x.status !== "completed");
     const isToday = d.getTime() === today.getTime();
     days.push(`
-      <div class="calendar-day ${d.getMonth()!==month?"muted":""} ${isToday?"today":""}">
+      <button type="button" class="calendar-day ${d.getMonth()!==month?"muted":""} ${isToday?"today":""}" data-calendar-date="${key}">
         <div>${d.getDate()}</div>
         <div class="dot-row">${dayItems.slice(0,5).map(x => `<span class="dot ${statusFor(x)==="overdue"?"overdue":""}"></span>`).join("")}</div>
       </div>
@@ -165,6 +155,17 @@ function renderAll() {
   renderHome();
   renderItems();
   renderCalendar();
+}
+
+function renderCalendarAgenda(dateKey) { const agenda=items.filter(i=>i.dueDate===dateKey).sort((a,b)=>(a.status==="completed")-(b.status==="completed")); const title=`Items on ${formatDate(dateKey,{weekday:"long",day:"numeric",month:"long",year:"numeric"})}`; $("calendarAgenda").innerHTML=agenda.length?`<h3 class="group-title">${title}</h3>${agenda.map(itemCard).join("")}`:`<div class="empty">${title}: no items.</div>`; }
+
+function renderInsights() {
+ const dim=$("insightDimension").value, period=$("insightPeriod").value; let data=items; if(period!=="all") data=data.filter(i=>Math.abs(daysFromToday(i.dueDate))<=Number(period));
+ const active=data.filter(i=>i.status!=="completed").length, completed=data.filter(i=>i.status==="completed").length, overdue=data.filter(i=>i.status!=="completed"&&daysFromToday(i.dueDate)<0).length;
+ $("insightSummary").innerHTML=`<div class="insight-kpi"><span>Total</span><strong>${data.length}</strong></div><div class="insight-kpi"><span>Upcoming</span><strong>${active}</strong></div><div class="insight-kpi"><span>Completed</span><strong>${completed}</strong></div><div class="insight-kpi danger-kpi"><span>Overdue</span><strong>${overdue}</strong></div>`;
+ if(!data.length){$("insightReport").innerHTML=`<div class="empty">No data for this period.</div>`;return;}
+ let groups={}; data.forEach(i=>{let k=dim==="type"?typeLabels[i.type]:dim==="category"?(i.category||"Uncategorised"):dim==="status"?(i.status==="completed"?"Completed / Paid":daysFromToday(i.dueDate)<0?"Overdue":"Upcoming / Active"):i.dueDate.slice(0,7); (groups[k]??=[]).push(i)});
+ $("insightReport").innerHTML=Object.keys(groups).sort().map(k=>{let a=groups[k],c=a.filter(i=>i.status==="completed").length,o=a.filter(i=>i.status!=="completed"&&daysFromToday(i.dueDate)<0).length;return `<section class="report-group"><div class="report-head"><strong>${escapeHtml(k)}</strong><span>${a.length} item${a.length===1?"":"s"} · ${c} completed${o?` · ${o} overdue`:""}</span></div><div class="progress"><span style="width:${Math.round(c/a.length*100)}%"></span></div>${a.slice(0,5).map(i=>`<div class="report-row"><span>${escapeHtml(i.title)}</span><span>${formatDate(i.dueDate)}</span></div>`).join("")}</section>`}).join("");
 }
 
 function openAdd() {
@@ -211,6 +212,9 @@ function completeItem(id) {
   renderAll();
 }
 
+function openCompletion(id){ const item=items.find(i=>i.id===id); if(!item)return; $("completionItemId").value=id; $("completionTitle").textContent=item.type==="payment"?"Mark as paid":"Mark as completed"; $("completedDate").value=toDateInput(new Date()); $("completionNotes").value=""; completionDialog.showModal(); }
+
+
 function escapeHtml(value="") {
   return value.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
@@ -232,7 +236,7 @@ form.addEventListener("submit", e => {
     createdAt: id ? (items.find(i=>i.id===id)?.createdAt || new Date().toISOString()) : new Date().toISOString()
   };
 
-  if (id) items = items.map(i => i.id === id ? item : i);
+  if (id) { if (!confirm(`Update "${existing?.title || item.title}"?\n\nYour changes will be saved.`)) return; items = items.map(i => i.id === id ? item : i); }
   else items.push(item);
 
   saveItems(items);
@@ -240,6 +244,11 @@ form.addEventListener("submit", e => {
   renderAll();
   checkAndNotify(items);
 });
+
+$("completionForm").addEventListener("submit", e=>{ e.preventDefault(); const date=$("completedDate").value, notes=$("completionNotes").value.trim(); if(!date||!notes){alert("Completion notes are mandatory.");return;} if(!confirm(`Confirm completion on ${formatDate(date)}?\n\nNotes: ${notes}`))return; completeItem($("completionItemId").value,date,notes); completionDialog.close(); });
+$("closeCompletion").onclick=()=>completionDialog.close(); $("cancelCompletion").onclick=()=>completionDialog.close();
+$("insightDimension").addEventListener("change",renderInsights); $("insightPeriod").addEventListener("change",renderInsights);
+const FEEDBACK_KEY="remindue.feedback.v1"; $("feedbackText").value=localStorage.getItem(FEEDBACK_KEY)||""; $("editFeedbackBtn").onclick=()=>{ $("feedbackText").disabled=false; $("feedbackText").focus(); $("editFeedbackBtn").classList.add("hidden"); $("saveFeedbackBtn").classList.remove("hidden"); }; $("saveFeedbackBtn").onclick=()=>{ if(!confirm("Save your enhancements / feedback?"))return; localStorage.setItem(FEEDBACK_KEY,$("feedbackText").value.trim()); $("feedbackText").disabled=true; $("saveFeedbackBtn").classList.add("hidden"); $("editFeedbackBtn").classList.remove("hidden"); alert("Feedback saved."); };
 
 document.addEventListener("click", e => {
   const open = e.target.closest("[data-action='open-add']");
@@ -249,7 +258,9 @@ document.addEventListener("click", e => {
   if (edit) openEdit(edit.dataset.edit);
 
   const complete = e.target.closest("[data-complete]");
-  if (complete) completeItem(complete.dataset.complete);
+  if (complete) openCompletion(complete.dataset.complete);
+  const cd = e.target.closest("[data-calendar-date]");
+  if (cd) { document.querySelectorAll(".calendar-day.selected").forEach(x=>x.classList.remove("selected")); cd.classList.add("selected"); renderCalendarAgenda(cd.dataset.calendarDate); }
 
   const nav = e.target.closest("[data-view]");
   if (nav) {
@@ -257,6 +268,7 @@ document.addEventListener("click", e => {
     document.querySelectorAll(".bottom-nav button").forEach(b => b.classList.remove("active"));
     $(nav.dataset.view).classList.add("active");
     nav.classList.add("active");
+    if (nav.dataset.view === "insightsView") renderInsights();
   }
 });
 
@@ -283,6 +295,7 @@ $("importInput").addEventListener("change", async e => {
   const file = e.target.files[0];
   if (!file) return;
   try {
+    if (!confirm("Import this backup? Existing ReminDUE data will be replaced.")) { e.target.value=""; return; }
     items = await importBackup(file);
     renderAll();
     alert("Backup imported successfully.");
